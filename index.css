@@ -1,11 +1,74 @@
-body{
+/* Main Body */
+body {
     margin: 0;
 }
-#body-header{
-    opacity: 0.5;
+
+/* Body header */
+#body-header {
+    /* opacity: 0.5; */
     height: 65vh;
     background-image: url(./portfolio-image1.jpg);
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
+}
+
+/* Horizontal lists */
+.horizontal-list {
+    list-style: none;
+    padding-left: 0%;
+    margin-left: 40px;
+}
+
+/* Horizontal list items */
+.horizontal-list li{
+    display: inline-block;
+    margin: 0px 40px 40px 0;
+}
+
+/* Anchor */
+.horizontal-list li a {
+    font-size: large;
+    text-shadow: antiquewhite;
+    text-decoration: none;
+    font-weight: 540;
+    color: black;
+    transition: color 0.5s, border-bottom 4s;
+}
+
+.horizontal-list li a:hover {
+    color: blueviolet;
+}
+
+/* Test Center */
+.text-center {
+    text-align: center;
+}
+
+/* Social Icons*/
+.social-icons li a{
+    color: blueviolet;
+}
+.social-icons li a i{
+    padding: 10px;
+    border-radius: 50%;
+    font-size: 1rem;
+}
+.social-icons li a i:hover{
+    box-shadow: 0px 0px 6px 4px aqua;
+}
+
+/* Name Social Container */
+#name-social-container{
+    margin-top: 26vh;
+}
+
+#my-name{
+    margin-left: -10px;
+    font-size: 3rem;
+    letter-spacing: 0.1rem;
+    color: aliceblue;
+}
+#my-name:hover{
+    color: rgb(117, 136, 243);
 }
