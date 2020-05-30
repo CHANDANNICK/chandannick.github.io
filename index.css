@@ -1,0 +1,11 @@
+body{
+    margin: 0;
+}
+#body-header{
+    opacity: 0.5;
+    height: 65vh;
+    background-image: url(./portfolio-image1.jpg);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
