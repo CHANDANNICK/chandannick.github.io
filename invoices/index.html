@@ -96,7 +96,7 @@
                 <div class="bold" style="font-size: 16px; margin-bottom: 5px;">BILLED TO:</div>
                 <div class="bold"><span id="outAggregator">Rise</span></div>
                 <div><i>(On behalf of <span id="outFirm">Tradeify LLC</span>)</i></div>
-                <div>USA</div>
+                <div id="outAddress">USA</div>
                 <br><br>
                 <div><b>Invoice No:</b> <span id="outInvNum">CKN/26-27/001</span></div>
                 <div><b>Invoice Date:</b> <span id="outInvDate"></span></div>
@@ -164,15 +164,24 @@
             let aggregator = document.getElementById('aggregatorInput').value;
             let amount = parseFloat(document.getElementById('amountInput').value).toFixed(2);
             
-            // Format Date to DD-MM-YYYY
+            // Format Date
             let dateObj = new Date(invDate);
             let formattedDate = ("0" + dateObj.getDate()).slice(-2) + "-" + ("0" + (dateObj.getMonth() + 1)).slice(-2) + "-" + dateObj.getFullYear();
+
+            // Set Address automatically based on Aggregator
+            let aggAddress = "USA";
+            if(aggregator === "Rise") {
+                aggAddress = "1309 Coffeen Ave, Ste 1200, Sheridan, WY 82801, USA";
+            } else if(aggregator === "WorkMarket, Inc.") {
+                aggAddress = "11 Penn Plaza, New York, NY 10001, USA";
+            }
 
             // Update Invoice DOM
             document.getElementById('outInvNum').innerText = invNum;
             document.getElementById('outInvDate').innerText = formattedDate;
             document.getElementById('outFirm').innerText = firm;
             document.getElementById('outAggregator').innerText = aggregator;
+            document.getElementById('outAddress').innerText = aggAddress;
             
             // Update amounts if valid number
             if(!isNaN(amount)) {
