@@ -22,14 +22,18 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; }
         th, td { border: 1px solid #000; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
-        .signature { margin-top: 60px; text-align: right; }
-        .box-border { border: 1px solid #000; padding: 15px; }
+        /* Signature margin reduced to save space */
+        .signature { margin-top: 25px; text-align: right; page-break-inside: avoid; }
+        .box-border { border: 1px solid #000; padding: 12px 15px; }
 
-        /* Hide controls when printing/saving as PDF */
+        /* PDF / Print Settings to strict fit in one page */
         @media print {
-            body { background: #fff; padding: 0; }
+            @page { margin: 10mm; } /* Page default margins reduced */
+            body { background: #fff; padding: 0; margin: 0; font-size: 13px; }
             .no-print { display: none !important; }
             .invoice-box { box-shadow: none; border: none; padding: 0; max-width: 100%; }
+            hr { margin: 10px 0; }
+            table { margin-top: 15px; margin-bottom: 15px; }
         }
     </style>
 </head>
