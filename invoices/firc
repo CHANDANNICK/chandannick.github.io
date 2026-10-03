@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIRC Uploader</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 30px; background: #e9ecef; color: #333; }
+        .container { max-width: 500px; margin: auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2c3e50; }
+        label { font-weight: bold; margin-top: 15px; display: block; }
+        input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #28a745; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; border-radius: 4px; font-size: 16px; font-weight: bold; margin-top: 20px; }
+        button:hover { background: #218838; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🏦 Upload FIRC Certificate</h2>
+        <p style="text-align:center; font-size:14px; color:#666;">Attach Bank FIRC to an existing Invoice in Google Sheets.</p>
+        
+        <label>Exact Invoice Number (e.g. CKN/26-27/001)</label>
+        <input type="text" id="invNum" placeholder="CKN/26-27/001">
+
+        <label>Select FIRC File (PDF or Image)</label>
+        <input type="file" id="fircFile" accept=".pdf, image/*">
+
+        <button id="uploadBtn" onclick="uploadFIRC()">📤 Upload & Link FIRC</button>
+    </div>
+
+    <script>
+        // YAHAN APNA WAHI PURANA WEB APP URL DAALEIN
+        const GOOGLE_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzg-Hvyc7aAQIh-zTl-LMeQtkeEpWvsPI0447mPVWQrtNE2Jnsbk4cbvbXJh-xvgjsZ/exec"; 
+
+        function uploadFIRC() {
+            let invNum = document.getElementById('invNum').value.trim();
+            let fileInput = document.getElementById('fircFile');
+            
+            if(!invNum) { alert("Please enter the Invoice Number!"); return; }
+            if(fileInput.files.length === 0) { alert("Please select a file to upload!"); return; }
+
+            let file = fileInput.files[0];
+            let btn = document.getElementById('uploadBtn');
+            btn.innerText = "⏳ Uploading... Please wait";
+            btn.disabled = true;
+
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let payload = {
+                    action: "uploadFIRC", // Yeh script ko batayega ki kya karna hai
+                    invoiceNo: invNum,
+                    fileName: file.name,
+                    mimeType: file.type,
+                    fileData: e.target.result // File ka base64 data
+                };
+
+                fetch(GOOGLE_SCRIPT_WEBAPP_URL, {
+                    method: "POST",
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.text())
+                .then(resData => {
+                    alert(resData); // Success ya Warning message dikhayega
+                    btn.innerText = "📤 Upload & Link FIRC";
+                    btn.disabled = false;
+                    document.getElementById('invNum').value = "";
+                    fileInput.value = "";
+                })
+                .catch(err => {
+                    alert("❌ Upload Failed. Check your connection.");
+                    btn.innerText = "📤 Upload & Link FIRC";
+                    btn.disabled = false;
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
