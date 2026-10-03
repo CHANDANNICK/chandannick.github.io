@@ -250,6 +250,7 @@
         function saveToCloud() {
             let invNum = document.getElementById('invNumInput').value;
             let invDate = document.getElementById('invDateInput').value;
+            let firm = document.getElementById('firmInput').value; // NAYA: Prop firm ka naam nikala
             let aggregator = document.getElementById('aggregatorInput').value;
             let amount = document.getElementById('amountInput').value;
             let pin = document.getElementById('adminPinInput').value; 
@@ -278,11 +279,13 @@
             };
 
             html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
+                
                 let payload = {
                     date: invDate,
                     invoiceNo: invNum,
-                    client: aggregator,
-                    amount: "$" + parseFloat(amount).toFixed(2),
+                    firm: firm,             // NAYA: Prop Firm bhej rahe hain
+                    aggregator: aggregator, // NAYA: Aggregator bhej rahe hain
+                    amount: parseFloat(amount).toFixed(2), // NAYA: $ hata diya taaki chart ban sake
                     pdfData: pdfBase64,
                     passcode: pin 
                 };
@@ -293,7 +296,7 @@
                 })
                 .then(res => res.text())
                 .then(resData => {
-                    alert(resData); // Success ya Error msg backend se
+                    alert(resData); 
                     btn.innerText = "☁️ Save";
                     btn.disabled = false;
                 }).catch(err => {
