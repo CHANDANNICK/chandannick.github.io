@@ -27,19 +27,23 @@
         <label>Select FIRC File (PDF or Image)</label>
         <input type="file" id="fircFile" accept=".pdf, image/*">
 
+        <label style="color: red;">🔒 Admin PIN</label>
+        <input type="password" id="adminPinInput" placeholder="Enter PIN to Upload">
+
         <button id="uploadBtn" onclick="uploadFIRC()">📤 Upload & Link FIRC</button>
     </div>
 
     <script>
-        // YAHAN APNA WAHI PURANA WEB APP URL DAALEIN
         const GOOGLE_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzg-Hvyc7aAQIh-zTl-LMeQtkeEpWvsPI0447mPVWQrtNE2Jnsbk4cbvbXJh-xvgjsZ/exec"; 
 
         function uploadFIRC() {
             let invNum = document.getElementById('invNum').value.trim();
             let fileInput = document.getElementById('fircFile');
+            let pin = document.getElementById('adminPinInput').value;
             
             if(!invNum) { alert("Please enter the Invoice Number!"); return; }
             if(fileInput.files.length === 0) { alert("Please select a file to upload!"); return; }
+            if(!pin) { alert("Please enter Admin PIN to upload!"); return; }
 
             let file = fileInput.files[0];
             let btn = document.getElementById('uploadBtn');
@@ -49,11 +53,12 @@
             let reader = new FileReader();
             reader.onload = function(e) {
                 let payload = {
-                    action: "uploadFIRC", // Yeh script ko batayega ki kya karna hai
+                    action: "uploadFIRC",
                     invoiceNo: invNum,
                     fileName: file.name,
                     mimeType: file.type,
-                    fileData: e.target.result // File ka base64 data
+                    fileData: e.target.result,
+                    passcode: pin // PIN backend ko ja raha hai
                 };
 
                 fetch(GOOGLE_SCRIPT_WEBAPP_URL, {
@@ -62,11 +67,12 @@
                 })
                 .then(res => res.text())
                 .then(resData => {
-                    alert(resData); // Success ya Warning message dikhayega
+                    alert(resData); 
                     btn.innerText = "📤 Upload & Link FIRC";
                     btn.disabled = false;
                     document.getElementById('invNum').value = "";
                     fileInput.value = "";
+                    document.getElementById('adminPinInput').value = "";
                 })
                 .catch(err => {
                     alert("❌ Upload Failed. Check your connection.");
