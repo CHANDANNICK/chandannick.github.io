@@ -43,7 +43,7 @@
 
     <!-- CONTROL PANEL (Form) -->
     <div class="controls no-print">
-        <h2>🧾 CHANDAN KUMAR NICK</h2>
+        <h2>🧾 Invoice Generator Setup</h2>
         
         <div>
             <label>Invoice Number</label>
@@ -77,13 +77,17 @@
             <label>Attach Proofs (Images)</label>
             <input type="file" id="attachmentsInput" multiple accept="image/*" onchange="previewAttachments()" style="background: #fff; padding: 6px;">
         </div>
+
+        <div>
+            <label style="color: red;">🔒 Admin PIN</label>
+            <input type="password" id="adminPinInput" placeholder="Enter PIN to Save">
+        </div>
         
-        <!-- Naye Buttons -->
+        <!-- Buttons -->
         <div class="btn-group">
             <button onclick="window.print()" style="background: #2c3e50;">🖨️ Print</button>
             <button id="saveBtn" onclick="saveToCloud()" style="background: #27ae60;">☁️ Save</button>
             <button onclick="viewHistory()" style="background: #d35400;">📊 History</button>
-            <!-- Ye raha FIRC upload page kholne ka naya button -->
             <button onclick="window.open('firc.html', '_blank')" style="background: #8e44ad;">🏦 Upload FIRC</button>
         </div>
     </div>
@@ -203,16 +207,13 @@
             }
         }
         
-        // Run once on load
         updateInvoice();
 
-        // ------------------------------------------------------------------
         // Attachment Preview Function
-        // ------------------------------------------------------------------
         function previewAttachments() {
             let fileInput = document.getElementById('attachmentsInput');
             let container = document.getElementById('attachmentsContainer');
-            container.innerHTML = ""; // Purani images hatayein
+            container.innerHTML = ""; 
 
             let files = fileInput.files;
             if (files.length === 0) return;
@@ -239,10 +240,6 @@
             });
         }
 
-        // ------------------------------------------------------------------
-        // NAYA CODE: Google Cloud me Save karne aur History dekhne ke liye
-        // ------------------------------------------------------------------
-
         const GOOGLE_SHEET_VIEW_URL = "https://docs.google.com/spreadsheets/d/1dc4N0IR4jRESIlhZbzxr_7uXgz0g67YMJA28KX0cxRM/edit?gid=0#gid=0"; 
         const GOOGLE_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzg-Hvyc7aAQIh-zTl-LMeQtkeEpWvsPI0447mPVWQrtNE2Jnsbk4cbvbXJh-xvgjsZ/exec"; 
 
@@ -255,35 +252,39 @@
             let invDate = document.getElementById('invDateInput').value;
             let aggregator = document.getElementById('aggregatorInput').value;
             let amount = document.getElementById('amountInput').value;
+            let pin = document.getElementById('adminPinInput').value; 
 
             if(!invNum || !amount) {
                 alert("Please fill details!");
                 return;
             }
+            if(!pin) {
+                alert("Please enter Admin PIN to save!");
+                return;
+            }
 
             let btn = document.getElementById('saveBtn');
-            btn.innerText = "⏳ Saving to Cloud (Wait 3-5 sec)...";
+            btn.innerText = "⏳ Saving...";
             btn.disabled = true;
 
-            // Invoice aur attachments ko mila kar PDF banayega
             let element = document.getElementById('invoice');
             let opt = {
                 margin: 0,
-                filename: invNum.replace(/\//g, "-") + '.pdf', // Slashes hata kar safe filename banayega
+                filename: invNum.replace(/\//g, "-") + '.pdf', 
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, scrollY: 0 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: 'css', avoid: ['.signature', '.box-border', 'table'] } // Attachments naye page par jayenge
+                pagebreak: { mode: 'css', avoid: ['.signature', '.box-border', 'table'] } 
             };
 
             html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
-                
                 let payload = {
                     date: invDate,
                     invoiceNo: invNum,
                     client: aggregator,
                     amount: "$" + parseFloat(amount).toFixed(2),
-                    pdfData: pdfBase64
+                    pdfData: pdfBase64,
+                    passcode: pin 
                 };
 
                 fetch(GOOGLE_SCRIPT_WEBAPP_URL, {
@@ -292,7 +293,7 @@
                 })
                 .then(res => res.text())
                 .then(resData => {
-                    alert("✅ Success! Data Sheet me chala gaya aur PDF Drive me save ho gaya.");
+                    alert(resData); // Success ya Error msg backend se
                     btn.innerText = "☁️ Save";
                     btn.disabled = false;
                 }).catch(err => {
