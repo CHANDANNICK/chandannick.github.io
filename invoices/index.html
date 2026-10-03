@@ -13,7 +13,8 @@
         label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 5px; }
         input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .btn-group { display: flex; gap: 10px; grid-column: 1 / -1; margin-top: 10px; flex-wrap: wrap; }
-        button { color: white; border: none; padding: 12px 20px; cursor: pointer; border-radius: 4px; font-size: 16px; font-weight: bold; flex: 1; min-width: 150px; }
+        /* Naya: Button size chota kiya taaki 5 buttons fit aa jayein */
+        button { color: white; border: none; padding: 12px 15px; cursor: pointer; border-radius: 4px; font-size: 15px; font-weight: bold; flex: 1; min-width: 130px; }
         
         /* Invoice Paper Styles */
         .invoice-box { background: #fff; max-width: 800px; margin: auto; padding: 20px 30px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); font-size: 13.5px; line-height: 22px; color: #000; }
@@ -83,12 +84,13 @@
             <input type="password" id="adminPinInput" placeholder="Enter PIN to Save">
         </div>
         
-        <!-- Buttons -->
+        <!-- Yahan 5 Buttons ho gaye hain -->
         <div class="btn-group">
             <button onclick="window.print()" style="background: #2c3e50;">🖨️ Print</button>
             <button id="saveBtn" onclick="saveToCloud()" style="background: #27ae60;">☁️ Save</button>
             <button onclick="viewHistory()" style="background: #d35400;">📊 History</button>
             <button onclick="window.open('firc.html', '_blank')" style="background: #8e44ad;">🏦 Upload FIRC</button>
+            <button onclick="openAnalytics()" style="background: #2980b9;">📈 Analytics</button> <!-- Naya Button -->
         </div>
     </div>
 
@@ -242,9 +244,16 @@
 
         const GOOGLE_SHEET_VIEW_URL = "https://docs.google.com/spreadsheets/d/1dc4N0IR4jRESIlhZbzxr_7uXgz0g67YMJA28KX0cxRM/edit?gid=0#gid=0"; 
         const GOOGLE_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzg-Hvyc7aAQIh-zTl-LMeQtkeEpWvsPI0447mPVWQrtNE2Jnsbk4cbvbXJh-xvgjsZ/exec"; 
+        
+        // YE RAHA AAPKA DATA STUDIO LINK
+        const DATA_STUDIO_URL = "https://datastudio.google.com/reporting/2f6ccd9f-6764-4a04-b0c1-843a6b8a9784";
 
         function viewHistory() {
             window.open(GOOGLE_SHEET_VIEW_URL, "_blank");
+        }
+
+        function openAnalytics() {
+            window.open(DATA_STUDIO_URL, "_blank"); // Analytics Button Function
         }
 
         function saveToCloud() {
