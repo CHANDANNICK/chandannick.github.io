@@ -4,14 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice Generator</title>
+    <!-- PDF banne ke liye html2pdf library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f9; color: #333; }
         .controls { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         .controls h2 { grid-column: 1 / -1; margin-top: 0; color: #2c3e50; }
         label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 5px; }
         input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background: #2980b9; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-size: 16px; font-weight: bold; grid-column: 1 / -1; margin-top: 10px; }
-        button:hover { background: #3498db; }
+        .btn-group { display: flex; gap: 10px; grid-column: 1 / -1; margin-top: 10px; flex-wrap: wrap; }
+        button { color: white; border: none; padding: 12px 20px; cursor: pointer; border-radius: 4px; font-size: 16px; font-weight: bold; flex: 1; min-width: 200px; }
         
         /* Invoice Paper Styles */
         .invoice-box { background: #fff; max-width: 800px; margin: auto; padding: 30px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); font-size: 14px; line-height: 24px; color: #000; }
@@ -22,8 +24,6 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; }
         th, td { border: 1px solid #000; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
-        /* Signature margin reduced to save space */
-        /* Signature margin reduced to save space */
         .signature { margin-top: 30px; text-align: right; }
         .box-border { border: 1px solid #000; padding: 15px; }
 
@@ -69,7 +69,12 @@
             <input type="number" id="amountInput" value="1000" oninput="updateInvoice()">
         </div>
         
-        <button onclick="window.print()">🖨️ Download / Print PDF</button>
+        <!-- Naye 3 Buttons -->
+        <div class="btn-group">
+            <button onclick="window.print()" style="background: #2c3e50;">🖨️ Download / Print</button>
+            <button id="saveBtn" onclick="saveToCloud()" style="background: #27ae60;">☁️ Save to Cloud</button>
+            <button onclick="viewHistory()" style="background: #d35400;">📊 View History</button>
+        </div>
     </div>
 
     <!-- ACTUAL INVOICE -->
@@ -145,10 +150,7 @@
         <div class="signature">
             <div style="display: inline-block; text-align: center;">
                 <div class="bold">For CHANDAN KUMAR NICK</div>
-                
-                <!-- 'margin: 0 auto' और 'display: block' इसे बिल्कुल बीच में फिक्स कर देगा -->
                 <img src="sign.png" alt="Signature" style="height: 120px; display: block; margin: -20px auto; mix-blend-mode: multiply;">
-                
                 <div>Authorized Signatory</div>
             </div>
         </div>
@@ -159,18 +161,15 @@
         document.getElementById('invDateInput').valueAsDate = new Date();
         
         function updateInvoice() {
-            // Get values from form
             let invNum = document.getElementById('invNumInput').value;
             let invDate = document.getElementById('invDateInput').value;
             let firm = document.getElementById('firmInput').value;
             let aggregator = document.getElementById('aggregatorInput').value;
             let amount = parseFloat(document.getElementById('amountInput').value).toFixed(2);
             
-            // Format Date
             let dateObj = new Date(invDate);
             let formattedDate = ("0" + dateObj.getDate()).slice(-2) + "-" + ("0" + (dateObj.getMonth() + 1)).slice(-2) + "-" + dateObj.getFullYear();
 
-            // Set Address automatically based on Aggregator
             let aggAddress = "USA";
             if(aggregator === "Rise Works, Inc.") {
                 aggAddress = "2000 Auburn Drive, One Chagrin Highlands, Suite 200, Beachwood, Ohio 44122, USA";
@@ -178,22 +177,97 @@
                 aggAddress = "240 W 37th St, Suite 301, New York, NY 10018, USA";
             }
 
-            // Update Invoice DOM
             document.getElementById('outInvNum').innerText = invNum;
             document.getElementById('outInvDate').innerText = formattedDate;
             document.getElementById('outFirm').innerText = firm;
             document.getElementById('outAggregator').innerText = aggregator;
             document.getElementById('outAddress').innerText = aggAddress;
             
-            // Update amounts if valid number
             if(!isNaN(amount)) {
                 document.getElementById('outAmount1').innerText = amount;
                 document.getElementById('outAmount2').innerText = amount;
             }
         }
         
-        // Run once on load to populate defaults
+        // Run once on load
         updateInvoice();
+
+        // ------------------------------------------------------------------
+        // NAYA CODE: Google Cloud me Save karne aur History dekhne ke liye
+        // ------------------------------------------------------------------
+
+        // YAHAN APNI GOOGLE SHEET KA LINK DAALNA HAI (Taaki view history par khule)
+        const GOOGLE_SHEET_VIEW_URL = "YOUR_GOOGLE_SHEET_URL_HERE"; 
+
+        // YAHAN APNE APPS SCRIPT KA URL DAALNA HAI
+        const GOOGLE_SCRIPT_WEBAPP_URL = "YOUR_GOOGLE_SCRIPT_URL_HERE"; 
+
+        function viewHistory() {
+            if(GOOGLE_SHEET_VIEW_URL === "YOUR_GOOGLE_SHEET_URL_HERE") {
+                alert("Pehle Google Sheet ka URL code me daalein!");
+            } else {
+                window.open(GOOGLE_SHEET_VIEW_URL, "_blank");
+            }
+        }
+
+        function saveToCloud() {
+            let invNum = document.getElementById('invNumInput').value;
+            let invDate = document.getElementById('invDateInput').value;
+            let aggregator = document.getElementById('aggregatorInput').value;
+            let amount = document.getElementById('amountInput').value;
+
+            if(!invNum || !amount) {
+                alert("Please fill details!");
+                return;
+            }
+
+            if(GOOGLE_SCRIPT_WEBAPP_URL === "YOUR_GOOGLE_SCRIPT_URL_HERE") {
+                alert("Pehle Google Apps Script ka URL code me setup karein!");
+                return;
+            }
+
+            let btn = document.getElementById('saveBtn');
+            btn.innerText = "⏳ Saving to Cloud (Wait 3-5 sec)...";
+            btn.disabled = true;
+
+            // Invoice ko background me PDF bana raha hai
+            let element = document.getElementById('invoice');
+            let opt = {
+                margin: 5,
+                filename: invNum + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
+                
+                // Data jo sheet me jayega
+                let payload = {
+                    date: invDate,
+                    invoiceNo: invNum,
+                    client: aggregator,
+                    amount: "$" + parseFloat(amount).toFixed(2),
+                    pdfData: pdfBase64 // PDF ki file string bankar yahan se jayegi
+                };
+
+                // Google Script ko data bhej rahe hain
+                fetch(GOOGLE_SCRIPT_WEBAPP_URL, {
+                    method: "POST",
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.text())
+                .then(resData => {
+                    alert("✅ Success! Data Sheet me chala gaya aur PDF Drive me save ho gaya.");
+                    btn.innerText = "☁️ Save to Cloud";
+                    btn.disabled = false;
+                }).catch(err => {
+                    alert("❌ Error: Network Issue.");
+                    btn.innerText = "☁️ Save to Cloud";
+                    btn.disabled = false;
+                });
+            });
+        }
     </script>
 </body>
 </html>
