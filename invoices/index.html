@@ -13,7 +13,7 @@
         label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 5px; }
         input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .btn-group { display: flex; gap: 10px; grid-column: 1 / -1; margin-top: 10px; flex-wrap: wrap; }
-        button { color: white; border: none; padding: 12px 20px; cursor: pointer; border-radius: 4px; font-size: 16px; font-weight: bold; flex: 1; min-width: 200px; }
+        button { color: white; border: none; padding: 12px 20px; cursor: pointer; border-radius: 4px; font-size: 16px; font-weight: bold; flex: 1; min-width: 150px; }
         
         /* Invoice Paper Styles */
         .invoice-box { background: #fff; max-width: 800px; margin: auto; padding: 20px 30px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); font-size: 13.5px; line-height: 22px; color: #000; }
@@ -73,17 +73,18 @@
             <input type="number" id="amountInput" value="1000" oninput="updateInvoice()">
         </div>
 
-        <!-- Yahan Attach Proofs ka option lagaya gaya hai -->
         <div>
             <label>Attach Proofs (Images)</label>
             <input type="file" id="attachmentsInput" multiple accept="image/*" onchange="previewAttachments()" style="background: #fff; padding: 6px;">
         </div>
         
-        <!-- Naye 3 Buttons -->
+        <!-- Naye Buttons -->
         <div class="btn-group">
-            <button onclick="window.print()" style="background: #2c3e50;">🖨️ Download / Print</button>
-            <button id="saveBtn" onclick="saveToCloud()" style="background: #27ae60;">☁️ Save to Cloud</button>
-            <button onclick="viewHistory()" style="background: #d35400;">📊 View History</button>
+            <button onclick="window.print()" style="background: #2c3e50;">🖨️ Print</button>
+            <button id="saveBtn" onclick="saveToCloud()" style="background: #27ae60;">☁️ Save</button>
+            <button onclick="viewHistory()" style="background: #d35400;">📊 History</button>
+            <!-- Ye raha FIRC upload page kholne ka naya button -->
+            <button onclick="window.open('firc.html', '_blank')" style="background: #8e44ad;">🏦 Upload FIRC</button>
         </div>
     </div>
 
@@ -292,11 +293,11 @@
                 .then(res => res.text())
                 .then(resData => {
                     alert("✅ Success! Data Sheet me chala gaya aur PDF Drive me save ho gaya.");
-                    btn.innerText = "☁️ Save to Cloud";
+                    btn.innerText = "☁️ Save";
                     btn.disabled = false;
                 }).catch(err => {
                     alert("❌ Error: Network Issue.");
-                    btn.innerText = "☁️ Save to Cloud";
+                    btn.innerText = "☁️ Save";
                     btn.disabled = false;
                 });
             });
