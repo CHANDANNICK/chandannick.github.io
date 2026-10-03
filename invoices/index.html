@@ -27,6 +27,10 @@
         .signature { margin-top: 10px; text-align: right; page-break-inside: avoid; }
         .box-border { border: 1px solid #000; padding: 10px 15px; }
 
+        /* Attachments Styling */
+        .attachment-page { page-break-before: always; text-align: center; padding-top: 20px; }
+        .attachment-img { max-width: 100%; max-height: 950px; object-fit: contain; border: 1px solid #ccc; padding: 5px; margin-top: 10px; }
+
         /* Hide controls when printing/saving as PDF */
         @media print {
             body { background: #fff; padding: 0; }
@@ -67,6 +71,12 @@
         <div>
             <label>Amount (USD)</label>
             <input type="number" id="amountInput" value="1000" oninput="updateInvoice()">
+        </div>
+
+        <!-- Yahan Attach Proofs ka option lagaya gaya hai -->
+        <div>
+            <label>Attach Proofs (Images)</label>
+            <input type="file" id="attachmentsInput" multiple accept="image/*" onchange="previewAttachments()" style="background: #fff; padding: 6px;">
         </div>
         
         <!-- Naye 3 Buttons -->
@@ -154,6 +164,9 @@
                 <div>Authorized Signatory</div>
             </div>
         </div>
+
+        <!-- Attachments will be injected here automatically -->
+        <div id="attachmentsContainer"></div>
     </div>
 
     <script>
@@ -193,21 +206,47 @@
         updateInvoice();
 
         // ------------------------------------------------------------------
+        // Attachment Preview Function
+        // ------------------------------------------------------------------
+        function previewAttachments() {
+            let fileInput = document.getElementById('attachmentsInput');
+            let container = document.getElementById('attachmentsContainer');
+            container.innerHTML = ""; // Purani images hatayein
+
+            let files = fileInput.files;
+            if (files.length === 0) return;
+
+            Array.from(files).forEach((file, index) => {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let div = document.createElement('div');
+                    div.className = "attachment-page"; 
+                    
+                    let title = document.createElement('div');
+                    title.className = "bold";
+                    title.innerText = "Attachment " + (index + 1) + ": " + file.name;
+                    
+                    let img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = "attachment-img";
+                    
+                    div.appendChild(title);
+                    div.appendChild(img);
+                    container.appendChild(div);
+                }
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ------------------------------------------------------------------
         // NAYA CODE: Google Cloud me Save karne aur History dekhne ke liye
         // ------------------------------------------------------------------
 
-        // YAHAN APNI GOOGLE SHEET KA LINK DAALNA HAI (Taaki view history par khule)
         const GOOGLE_SHEET_VIEW_URL = "https://docs.google.com/spreadsheets/d/1dc4N0IR4jRESIlhZbzxr_7uXgz0g67YMJA28KX0cxRM/edit?gid=0#gid=0"; 
-
-        // YAHAN APNE APPS SCRIPT KA URL DAALNA HAI
         const GOOGLE_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzg-Hvyc7aAQIh-zTl-LMeQtkeEpWvsPI0447mPVWQrtNE2Jnsbk4cbvbXJh-xvgjsZ/exec"; 
 
         function viewHistory() {
-            if(GOOGLE_SHEET_VIEW_URL === "YOUR_GOOGLE_SHEET_URL_HERE") {
-                alert("Pehle Google Sheet ka URL code me daalein!");
-            } else {
-                window.open(GOOGLE_SHEET_VIEW_URL, "_blank");
-            }
+            window.open(GOOGLE_SHEET_VIEW_URL, "_blank");
         }
 
         function saveToCloud() {
@@ -221,37 +260,31 @@
                 return;
             }
 
-            if(GOOGLE_SCRIPT_WEBAPP_URL === "YOUR_GOOGLE_SCRIPT_URL_HERE") {
-                alert("Pehle Google Apps Script ka URL code me setup karein!");
-                return;
-            }
-
             let btn = document.getElementById('saveBtn');
             btn.innerText = "⏳ Saving to Cloud (Wait 3-5 sec)...";
             btn.disabled = true;
 
-            // Invoice ko background me PDF bana raha hai
+            // Invoice aur attachments ko mila kar PDF banayega
             let element = document.getElementById('invoice');
             let opt = {
-                margin: 5,
-                filename: invNum + '.pdf',
+                margin: 0,
+                filename: invNum.replace(/\//g, "-") + '.pdf', // Slashes hata kar safe filename banayega
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                html2canvas: { scale: 2, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: 'css', avoid: ['.signature', '.box-border', 'table'] } // Attachments naye page par jayenge
             };
 
             html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
                 
-                // Data jo sheet me jayega
                 let payload = {
                     date: invDate,
                     invoiceNo: invNum,
                     client: aggregator,
                     amount: "$" + parseFloat(amount).toFixed(2),
-                    pdfData: pdfBase64 // PDF ki file string bankar yahan se jayegi
+                    pdfData: pdfBase64
                 };
 
-                // Google Script ko data bhej rahe hain
                 fetch(GOOGLE_SCRIPT_WEBAPP_URL, {
                     method: "POST",
                     body: JSON.stringify(payload)
